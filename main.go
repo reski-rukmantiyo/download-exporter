@@ -1,10 +1,20 @@
 package main
 
-import "gofr.dev/pkg/gofr"
+import (
+	"github.com/reski-rukmantiyo/download-exporter/pkg/download"
+	"gofr.dev/pkg/gofr"
+	"gofr.dev/pkg/gofr/http/response"
+)
 
 func main() {
 	// initialise gofr object
 	app := gofr.New()
+
+	app.GET("/download", func(ctx *gofr.Context) (interface{}, error) {
+		// get the file path from the query params
+		download.Download()
+		return response.Raw{Data: "Downloaded"}, nil
+	})
 
 	// register route greet
 	app.GET("/", func(ctx *gofr.Context) (interface{}, error) {
