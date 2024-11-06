@@ -6,6 +6,7 @@ require (
 	github.com/docker/docker v27.3.1+incompatible
 	github.com/prometheus/client_golang v1.20.5
 	gofr.dev v1.25.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (

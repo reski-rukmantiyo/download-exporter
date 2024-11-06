@@ -10,19 +10,22 @@ import (
 	"github.com/docker/docker/client"
 )
 
-func PullDockerImage(ctx context.Context, imageToPull string) {
+func PullDockerImage(ctx context.Context, imageToPull ImageDownload, location string) {
 	startTime := time.Now()
+	imageName := imageToPull.Image
+	imageLabel := imageToPull.Label
+
 	cli, err := client.NewClientWithOpts(client.FromEnv)
 	if err != nil {
-		dockerPullFailure.WithLabelValues(imageToPull, err.Error()).Inc()
+		dockerPullFailure.WithLabelValues(imageName, err.Error(), imageLabel, location).Inc()
 		log.Println(err)
 		return
 	}
 
 	options := image.PullOptions{}
-	rc, err := cli.ImagePull(ctx, imageToPull, options)
+	rc, err := cli.ImagePull(ctx, imageToPull.Image, options)
 	if err != nil {
-		dockerPullFailure.WithLabelValues(imageToPull, err.Error()).Inc()
+		dockerPullFailure.WithLabelValues(imageName, err.Error(), imageLabel, location).Inc()
 		log.Println(err)
 		return
 	}
@@ -38,7 +41,7 @@ func PullDockerImage(ctx context.Context, imageToPull string) {
 		n, err := rc.Read(buf)
 		if err != nil {
 			if err != io.EOF {
-				dockerPullFailure.WithLabelValues(imageToPull, err.Error()).Inc()
+				dockerPullFailure.WithLabelValues(imageName, err.Error(), imageLabel, location).Inc()
 				log.Println(err)
 			}
 			break
@@ -50,7 +53,7 @@ func PullDockerImage(ctx context.Context, imageToPull string) {
 			timeDiff := currentTime.Sub(previousTimestamp).Seconds()
 			if timeDiff > 0 {
 				currentSpeed = float64(sizeDiff) / timeDiff
-				dockerPullSpeed.WithLabelValues(imageToPull).Set(currentSpeed)
+				dockerPullSpeed.WithLabelValues(imageName, imageLabel, location).Set(currentSpeed)
 			}
 		}
 		previousTimestamp = currentTime
@@ -58,16 +61,16 @@ func PullDockerImage(ctx context.Context, imageToPull string) {
 	}
 
 	elapsedTime := time.Since(startTime).Seconds()
-	dockerPullDuration.WithLabelValues(imageToPull).Observe(elapsedTime)
-	dockerPullSuccess.WithLabelValues(imageToPull).Inc()
-	log.Printf("Pulled %s in %.2f seconds\n", imageToPull, elapsedTime)
+	dockerPullDuration.WithLabelValues(imageName, imageLabel, location).Observe(elapsedTime)
+	dockerPullSuccess.WithLabelValues(imageName, imageLabel, location).Inc()
+	log.Printf("Pulled %s in %.2f seconds\n", imageName, elapsedTime)
 
 	// Delete the pulled image
-	if err := deleteDockerImage(cli, imageToPull); err != nil {
-		dockerImageDeletionFailure.WithLabelValues(imageToPull, err.Error()).Inc()
+	if err := deleteDockerImage(cli, imageName); err != nil {
+		dockerImageDeletionFailure.WithLabelValues(imageName, err.Error(), imageLabel, location).Inc()
 		log.Println(err)
 	} else {
-		dockerImageDeletionSuccess.WithLabelValues(imageToPull).Inc()
+		dockerImageDeletionSuccess.WithLabelValues(imageName, imageLabel, location).Inc()
 		log.Printf("Deleted image %s\n", imageToPull)
 	}
 }

@@ -1,0 +1,6 @@
+location: Jakarta
+image_downloads:
+  - Image: "nginx:latest"
+    Label: "nginx"
+  - Image: "alpine:latest"
+    Label: "alpine"

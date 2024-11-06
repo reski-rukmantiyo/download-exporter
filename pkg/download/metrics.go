@@ -2,9 +2,12 @@ package download
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -13,7 +16,7 @@ var (
 			Name: "docker_pull_success",
 			Help: "Number of successful Docker image pulls.",
 		},
-		[]string{"image"},
+		[]string{"image", "label", "location"},
 	)
 
 	dockerPullFailure = prometheus.NewCounterVec(
@@ -21,7 +24,7 @@ var (
 			Name: "docker_pull_failure",
 			Help: "Number of failed Docker image pulls.",
 		},
-		[]string{"image", "reason"},
+		[]string{"image", "reason", "label", "location"},
 	)
 
 	dockerPullDuration = prometheus.NewHistogramVec(
@@ -30,7 +33,7 @@ var (
 			Help:    "Histogram of Docker image pull durations in seconds.",
 			Buckets: []float64{1, 5, 10, 30, 60, 120}, // Adjust buckets as needed
 		},
-		[]string{"image"},
+		[]string{"image", "label", "location"},
 	)
 
 	dockerPullSpeed = prometheus.NewGaugeVec(
@@ -38,7 +41,7 @@ var (
 			Name: "docker_pull_speed_bytes_per_second",
 			Help: "Speed of Docker image pull in bytes per second.",
 		},
-		[]string{"image"},
+		[]string{"image", "label", "location"},
 	)
 
 	dockerImageDeletionSuccess = prometheus.NewCounterVec(
@@ -46,7 +49,7 @@ var (
 			Name: "docker_image_deletion_success",
 			Help: "Number of successful Docker image deletions.",
 		},
-		[]string{"image"},
+		[]string{"image", "label", "location"},
 	)
 
 	dockerImageDeletionFailure = prometheus.NewCounterVec(
@@ -54,7 +57,7 @@ var (
 			Name: "docker_image_deletion_failure",
 			Help: "Number of failed Docker image deletions.",
 		},
-		[]string{"image", "reason"},
+		[]string{"image", "reason", "label", "location"},
 	)
 	// imageToPull = "YOUR_DOCKER_IMAGE_HERE" // Update this (e.g., "nginx:latest")
 )
@@ -104,7 +107,25 @@ func Download() {
 	log.Print("Downloading file")
 
 	// download image
-	PullDockerImage(context.Background(), "nginx:latest")
-	PullDockerImage(context.Background(), "alpine:latest")
-	PullDockerImage(context.Background(), "busybox:latest")
+	// PullDockerImage(context.Background(), "nginx:latest")
+	// PullDockerImage(context.Background(), "alpine:latest")
+	// PullDockerImage(context.Background(), "busybox:latest")
+
+	yamlFilePath := "files.yaml"
+	data, err := os.ReadFile(yamlFilePath)
+	if err != nil {
+		fmt.Printf("Error reading %s: %v\n", yamlFilePath, err)
+		return
+	}
+
+	var imageConfig ImageConfig
+	err = yaml.Unmarshal(data, &imageConfig)
+	if err != nil {
+		fmt.Printf("Error unmarshaling YAML: %v\n", err)
+		return
+	}
+
+	for _, imageDownload := range imageConfig.ImageDownloads {
+		PullDockerImage(context.Background(), imageDownload, imageConfig.Location)
+	}
 }
