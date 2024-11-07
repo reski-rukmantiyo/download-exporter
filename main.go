@@ -29,6 +29,10 @@ func main() {
 	app.AddCronJob("* * * * *", "", func(ctx *gofr.Context) {
 		log.Printf("Cron job running at %s", time.Now().String())
 
+		if download.IsProcessing() {
+			log.Printf("Download is in progress")
+			return
+		}
 		download.Download()
 
 		log.Printf("Cron job finished at %s", time.Now().String())

@@ -11,6 +11,7 @@ import (
 )
 
 var (
+	isProcessing      = false
 	dockerPullSuccess = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "docker_pull_success",
@@ -125,7 +126,13 @@ func Download() {
 		return
 	}
 
+	isProcessing = true
 	for _, imageDownload := range imageConfig.ImageDownloads {
 		PullDockerImage(context.Background(), imageDownload, imageConfig.Location)
 	}
+	isProcessing = false
+}
+
+func IsProcessing() bool {
+	return isProcessing
 }
