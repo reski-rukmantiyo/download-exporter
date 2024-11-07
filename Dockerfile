@@ -23,7 +23,7 @@ WORKDIR /app
 # Copy the compiled Go binary from the builder stage
 COPY --from=builder /app/download-exporter /download-exporter
 COPY --from=builder /app/configs/.env /configs/.env
-COPY --from=builder /files.yaml /files.yaml
+COPY --from=builder /app/files.yaml /files.yaml
 
 USER 65532:65532
 EXPOSE 8181
