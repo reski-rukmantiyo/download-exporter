@@ -6,6 +6,6 @@ type ImageConfig struct {
 }
 
 type ImageDownload struct {
-	Image string
-	Label string
+	Image string `yaml:"image"`
+	Label string `yaml:"label"`
 }
