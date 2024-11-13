@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -25,8 +26,11 @@ func main() {
 		return "Hello Download Exporter!", nil
 	})
 
+	minToPull := download.ImageConfigData.MinuteToPull
+	formatCronjob := fmt.Sprintf("*/%d * * * * *", minToPull)
+
 	// Run the cron job every 1 hour
-	app.AddCronJob("* * * * *", "", func(ctx *gofr.Context) {
+	app.AddCronJob(formatCronjob, "", func(ctx *gofr.Context) {
 		log.Printf("Cron job running at %s", time.Now().String())
 
 		if download.IsProcessing() {

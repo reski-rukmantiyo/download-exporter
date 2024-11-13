@@ -104,6 +104,23 @@ var (
 	// filename         = "example.txt"                    // Update if needed
 )
 
+var ImageConfigData ImageConfig
+
+func init() {
+	yamlFilePath := "files.yaml"
+	data, err := os.ReadFile(yamlFilePath)
+	if err != nil {
+		fmt.Printf("Error reading %s: %v\n", yamlFilePath, err)
+		return
+	}
+
+	err = yaml.Unmarshal(data, &ImageConfigData)
+	if err != nil {
+		fmt.Printf("Error unmarshaling YAML: %v\n", err)
+		return
+	}
+}
+
 func Download() {
 	log.Print("Downloading file")
 
@@ -112,23 +129,9 @@ func Download() {
 	// PullDockerImage(context.Background(), "alpine:latest")
 	// PullDockerImage(context.Background(), "busybox:latest")
 
-	yamlFilePath := "files.yaml"
-	data, err := os.ReadFile(yamlFilePath)
-	if err != nil {
-		fmt.Printf("Error reading %s: %v\n", yamlFilePath, err)
-		return
-	}
-
-	var imageConfig ImageConfig
-	err = yaml.Unmarshal(data, &imageConfig)
-	if err != nil {
-		fmt.Printf("Error unmarshaling YAML: %v\n", err)
-		return
-	}
-
 	isProcessing = true
-	for _, imageDownload := range imageConfig.ImageDownloads {
-		PullDockerImage(context.Background(), imageDownload, imageConfig.Location)
+	for _, imageDownload := range ImageConfigData.ImageDownloads {
+		PullDockerImage(context.Background(), imageDownload, ImageConfigData.Location)
 	}
 	isProcessing = false
 }

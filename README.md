@@ -12,5 +12,5 @@
 
 # To Do
 
-1. Add unix types to handle of docker type
-2. Add schedule time to download the image
+1. Add unix types to handle of docker type (WIP)
+2. Add schedule time to download the image (WIP)\
