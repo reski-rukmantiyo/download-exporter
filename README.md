@@ -9,3 +9,8 @@
 2. Run the docker image
 3. Wait for the image to be downloaded
 4. Open the browser and go to the address: http://localhost:2121/metrics
+
+# To Do
+
+1. Add unix types to handle of docker type
+2. Add schedule time to download the image

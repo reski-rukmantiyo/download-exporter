@@ -1,4 +1,6 @@
 location: Jakarta
+minute_time_to_pull: 1
+type_of_container: "docker" # docker or containerd
 image_downloads:
   - image: "nginx:latest"
     label: "nginx"
